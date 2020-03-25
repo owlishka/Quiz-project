@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% block head %}
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+{% endblock %}
+{% load widget_tweaks %}
+{% block title%}<title>All tests</title>{% endblock %}
+
+{% block content %}
+<div style="margin: 2rem">
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title">
+                        All tests
+                    </div>
+                    <div class="row">
+                        <div class="col s12 input-field">
+                            <div class="col s12 l6">
+                                <form method="get">
+                                <span>Filter name:</span>
+                                {% render_field filter.form.name %}
+                                <button type="submit">Search</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                       <form action="" method="get">
+                         <p>By Time: <select name="date" class="form-control">
+                             <option disabled selected value>-- select an option --</option>
+                             <option value ="created_on">Earlier first</option>
+                            <option value ="-created_on">Later first</option>
+                            </select></p>
+                           <p>By passed tests: <select name="passes" class="form-control">
+                             <option disabled selected value>-- select an option --</option>
+                             <option value ="1">Passed</option>
+                            <option value ="0">Have not passed yet</option>
+                            </select></p>
+                            <button type="submit" class="btn btn-sm btn-primary btn-raised mr-3">Sort</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="container bootstrap snippet">
+    <div class="row">
+             {% for test in tests %}
+       <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="wp-block product">
+                <h2 class="product-title"><a href="{% url 'quiz:detail_public_test' test.id %}">{{test.name}}<i class="fa fa-info-circle"></i></a></h2>
+                <p>
+                {{test.description}}
+                </p>
+                <p>
+                  Owner: {{ test.owner }}
+                </p>
+                <span class="chip">Total Attempts: {{ test.get_attempts }}</span>
+                <p><span class="chip">Created on: {{ test.created_on }}</span></p>
+                <div class="wp-block-footer">
+                    <a href="{% if request.user.is_authenticated %}{% url 'quiz:take_quiz' test.id %}{% else %}{% url 'authenticate:login' %}{% endif %}" class="btn btn-sm btn-danger btn-icon btn-cart pull-right">Take quiz</a>
+                </div>
+            </div>
+        </div>
+            {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}

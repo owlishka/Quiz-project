@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/log.css' %}">
+{% block title%}<title>Login</title>{% endblock %}
+{% block content %}
+    <div id="logreg-forms">
+            <h1 class="h3 mb-3 font-weight-normal" style="text-align: center"> Sign in</h1>
+         <form class="form-signin">
+            {% csrf_token %}
+            <div class="social-login">
+                <button type="submit" style="background-color: #0000FF; color: #fff" class="btn btn-block btn-tw" formaction="{% url 'authenticate:social:begin' 'twitter' %}">
+                    <span><i class="fab fa-twitter pr-1"></i> Sign in with Twitter</span></button>
+                <button class="btn btn-block btn-git" style="background-color: #2F4F4F; color: #fff" type="submit" formaction="{% url 'authenticate:social:begin' 'github' %}">
+                    <span><i class="fab fa-github"></i> Sign in with GitHub</span> </button>
+            </div>
+         </form>
+            <p style="text-align:center"> OR  </p>
+        <form class="form-signin"  method="post" action="{% url 'authenticate:login' %}">
+            {% csrf_token %}
+            <li><strong>{{ form.non_field_errors }}</strong></li>
+            {% render_field form.username class="form-control" placeholder="Username" %}
+            {% render_field form.password class="form-control" placeholder="Password" %}
+            <button class="btn btn-success btn-block" type="submit"><i class="fas fa-sign-in-alt"></i> Sign in</button>
+        </form>
+        <form class="form-signin"  action="{% url 'authenticate:register' %}">
+            <button class="btn btn-primary btn-block" type="submit" id="btn-signup"><i class="fas fa-user-plus"></i>Sign up New Account</button>
+            </form>
+    </div>
+{% endblock %}

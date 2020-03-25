@@ -1,0 +1,12 @@
+*.iml
+.idea
+out
+.env
+venv
+local_settings.py
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.classs
+.pyc
+media

@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% load static %}
+<link rel="stylesheet" media="all" type="text/css" href="{% static 'css/quiz.css' %}"/>
+<script type="text/javascript" src="{% static 'js/min.js' %}"></script>
+{% block head %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.5/quill.snow.css">
+    <link rel="shortcut icon" href="#">
+{% endblock %}
+{% block title%}<title>My tests</title>{% endblock %}
+{% block content %}
+{% include 'quiz/score.html' %}
+<div>
+	<div class="row">
+		<div>
+		  <ul id="questionButtons" class="collection" style="display: block; overflow-y: scroll; height: 100vh; width: 15vh">
+				<!-- To be filled by buttons -->
+				{% for i in num_questions %}
+				<li class="collection-item"><button type="button" class="questionButton btn-floating btn waves-effect waves-light blue" data-no="{{i}}">{{ i|add:"1" }}</button></li>
+				{% endfor %}
+		  </ul>
+		</div>
+		<div class="col s12 l9 offset-l1" style="margin-top: 3rem">
+			<div class="row">
+				{% if has_completed %}
+					<div class="col left">
+						<a class="btn waves-effect waves-light blue z-depth-3 modal-trigger" data-target="scoreModal"><span class="right">Score:{{ score }} %</span><span class="left"><i class="material-icons">pie_chart</i></span></a>
+					</div>
+				{% endif %}
+				<div class="col right">
+					{% if not has_completed %}
+					<form id="endQuizForm" method="POST" data-tno="{{ testno }}" action="{% url 'quiz:end_quiz' pk=testno %}">
+						{% csrf_token %}
+						<button type="button" class="btn waves-effect waves-light red accent-4 endQuizButton z-depth-3">End Quiz</button>
+					</form>
+					{% endif %}
+				</div>
+			</div>
+			<div>
+				<div>
+					<div>
+						<div class="card-panel z-depth-4">
+							<div class="progress">
+								<div class="indeterminate"></div>
+							</div>
+							<div class="mainContent">
+								<p id="questionData">
+									<!-- QUESTION HERE -->
+								</p>
+								<form id="submitResponse" action="POST" data-url="" data-qno="">
+                                {% csrf_token %}
+									<div style="margin-top: 2rem">
+										<p>
+											<input name="option" type="radio" id="option1" value="Red"/>
+											<label for="option1" class="grey-text text-darken-4">
+												<!-- OPTION 1 HERE -->
+											</label>
+										</p>
+										<p>
+											<input name="option" type="radio" id="option2" value="Green"/>
+											<label for="option2" class="grey-text text-darken-4">
+												<!-- OPTION 2 HERE -->
+											</label>
+										</p>
+										<p>
+											<input name="option" type="radio" id="option3" value="Blue"/>
+											<label for="option3" class="grey-text text-darken-4">
+												<!-- OPTION 3 HERE -->
+											</label>
+										</p>
+										<p>
+											<input name="option" type="radio" id="option4" value="Yellow"/>
+											<label for="option4" class="grey-text text-darken-4">
+												<!-- OPTION 4 HERE -->
+											</label>
+										</p>
+									</div>
+									<div style="margin-top: 2rem;">
+										<style>
+											.changeQuestion,#clearResponseBtn,.submitBtn {
+												font-size:0.8rem;
+												margin:1%;
+											}
+										</style>
+										<div class="row">
+											<div class="col s12 center">
+                                            <div class="col s12">
+												<a class="changeQuestion btn btn-floating waves-effect waves-light blue left z-depth-4" data-direction="-1"><i class="material-icons">keyboard_arrow_left</i></a>
+												<a class="changeQuestion btn btn-floating waves-effect waves-light blue right z-depth-4" data-direction="1"><i class="material-icons">keyboard_arrow_right</i></a>
+											</div>
+												<button type="submit" class="submitBtn btn waves-effect waves-light green z-depth-4" {% if has_completed %}disabled{% endif %}>Submit</button>
+												<button id="clearResponseBtn" class="btn waves-effect waves-light red z-depth-4" {% if has_completed %}disabled{% endif %}>Clear</button>
+											</div>
+                                        </div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+        		</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+{% if has_completed %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+{% endif %}
+<script>
+	let questions = null;
+	$(document).ready(function() {
+		$(".progress").hide();
+		$('.modal').modal();
+		let quill = new Quill('#questionData', {
+			readOnly: true,
+			"modules": {
+      			"toolbar": false
+  			},
+			"theme": "snow",
+		});
+		$.ajax({
+			method: 'GET',
+			url: "{% url 'quiz:getQuestions' pk=testno %}",
+			success: handleFormSuccess,
+			error: handleFormError,
+		});
+		$(".endQuizButton").click(function(evt) {
+			evt.preventDefault();
+			new PNotify({
+				title: 'Confirmation Needed',
+				text: 'Are you sure you want to end the test?',
+				icon: 'glyphicon glyphicon-question-sign',
+				type: 'info',
+				hide: false,
+				confirm: {
+					confirm: true
+				},
+				buttons: {
+					closer: false,
+					sticker: false
+				},
+				history: {
+					history: false
+				},
+				}).get().on('pnotify.confirm', function(){
+					$("#endQuizForm").submit();
+				}).on('pnotify.cancel', function(){
+				});
+		});
+		$("input[name='option']").click(function(evt){
+			$("#submitResponse button[type='submit']").prop("disabled", false);
+		});
+		$("#clearResponseBtn").click(function(evt) {
+			evt.preventDefault();
+			$("input[name='option']").prop("checked", false);
+			$("#submitResponse button[type='submit']").prop("disabled", false);
+			setTimeout(function(){
+				$("#submitResponse").submit();
+			},1);
+		});
+
+		function handleFormSuccess(data, textStatus, jqXHR) {
+			questions = data;
+			console.log(questions[0].update_url);
+			loadQuestion(0);
+		}
+		$(".changeQuestion").click(function(evt) {
+			evt.preventDefault();
+			let nextQuestion = parseInt($("#submitResponse").attr("data-qno")) + parseInt($(this).attr("data-direction"));
+			loadQuestion((questions.length+nextQuestion) % questions.length);
+		});
+		$(".questionButton").click(function(evt) {
+			evt.preventDefault();
+			$(".questionButton").prop("disabled", false);
+			$(this).prop("disabled", true);
+			loadQuestion(parseInt($(this).attr("data-no")));
+		});
+
+		function loadQuestion(qno) {
+			$(".questionButton").prop("disabled", false);
+			$(`.questionButton[data-no=${qno}]`).prop("disabled", true);
+			$(".progress").show(200);
+			$(".mainContent").css("filter","blur(2px)");
+			$(".ql-editor").html(`${qno+1}. ${questions[qno].question}`);
+			$("#option1").val(questions[qno].option1).prop('checked', false);
+			$("#option2").val(questions[qno].option2).prop('checked', false);
+			$("#option3").val(questions[qno].option3).prop('checked', false);
+			$("#option4").val(questions[qno].option4).prop('checked', false);
+			$("label[for='option1']").html(questions[qno].option1).parent().css('background-color', 'white');
+			$("label[for='option2']").html(questions[qno].option2).parent().css('background-color', 'white');
+			$("label[for='option3']").html(questions[qno].option3).parent().css('background-color', 'white');
+			$("label[for='option4']").html(questions[qno].option4).parent().css('background-color', 'white');
+			$("#submitResponse").attr("data-url", `quiz/ajax/${questions[qno].update_url.split("/").pop()}/response`).attr("data-qno", qno);
+			$("#submitResponse").submit(function(evt) {
+            evt.preventDefault();
+            let $formData = $(this).serialize();
+            $.ajax({
+					method: 'POST',
+					url: `/quiz/ajax/${questions[qno].update_url.split("/").pop()}/response`,
+					data: $formData,
+					success: function(data, textStatus, jqXHR) {
+						$("#submitResponse button[type='submit']").prop("disabled", true);
+						new PNotify({
+				    	text: 'Response submitted!',
+				    	type: 'info'
+						});
+					},
+					error: handleFormError,
+				});
+		});
+			$.ajax({
+				method: 'GET',
+				url: `/quiz/ajax/${questions[qno].update_url.split("/").pop()}/response`,
+				success: function(data, textStatus, jqXHR) {
+					if(data !== undefined) {
+                        for (var i = 1; i <= 4; i++) {
+                            if ($("#option" + i).val() === data.response) {
+                                $("#option" + i).prop("checked", true);
+                                break;
+                            }
+                        }
+                    }
+                    $(`input[value='${data.response}']`).prop("checked", true);
+
+					if(data.correct_answer != null) {
+						for(let i=1;i<=4;i++) {
+							 if($("#option"+i).val() === data.response) {
+								$("#option"+i).parent().css('background-color', '#e25045');
+							 }
+							 if($("#option"+i).val() === data.correct_answer) {
+								$("#option"+i).parent().css('background-color', '#91ff91');
+							 }
+					 	}
+					}
+					$(".progress").hide(500);
+					$(".mainContent").css("filter","blur(0px)");
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					new PNotify({
+						type:"error",
+						title:'Error! Reload the page'
+					});
+				},
+			})
+		}
+		{% if has_completed %}
+		$.ajax({
+			method: 'GET',
+			url: "{% url 'quiz:score_chart' pk=testno %}",
+			success: function(data, textStatus, jqXHR) {
+				console.log(data);
+                var donutChart = new Chart(document.getElementById("score-donut"),{
+                    "type":"doughnut",
+                    "data":{
+                        "labels":["Correct", "Wrong", "Not attempted"],
+                        "datasets":[
+                            {
+                                "data":[data.correct_count,data.wrong_count,data.total - data.correct_count - data.wrong_count],
+                                "backgroundColor":data.colors,
+                            }
+                        ]
+                    },
+                    "options": {
+                    }
+                });
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+
+			}
+		});
+		{% endif %}
+		function handleFormError(jqXHR, textStatus, errorThrown) {
+			new PNotify({
+		    title: 'Oops! Reload Again',
+				type: 'error'
+			});
+		}
+	});
+</script>
+{% endblock scripts %}

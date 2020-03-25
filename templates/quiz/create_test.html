@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% block title%}<title>Create test</title>{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Create quiz</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            <p class="text-center">Create name for your quiz and write some words about it</p>
+            <form method="post" id="CreateTestForm">
+                {% csrf_token %}
+                {% if form.errors %}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <ul><li>Please input valid data</li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                <label>Name your quiz:</label>{% render_field form.name class="input-lg form-control" %}
+                <label>Description:</label>{% render_field form.description class="input-lg form-control" %}
+                <input type="submit" class="col-xs-12 btn btn-primary btn-load btn-lg" data-loading-text="Create quiz.." value="Create quiz">
+            </form>
+        <button type="button" class="btn btn-outline-danger">
+                    <a class="nav-link" href="{% url 'quiz:my_tests' %}" style="color: red">
+                        Cancel</a></button>
+        </div><!--/col-sm-6-->
+    </div><!--/row-->
+</div>
+{% endblock content %}

@@ -1,0 +1,90 @@
+[
+{
+    "model": "authenticate.userprofile",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$180000$9P1goIQjt8XC$1yfoNMBc7Bi+sIAFTqLaUncY5WoTFiCdd96j+MoeHoY=",
+        "last_login": "2020-03-17T08:44:13.384Z",
+        "is_superuser": true,
+        "username": "admin",
+        "first_name": "",
+        "last_name": "",
+        "email": "as@dfd.cd",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2020-03-04T18:20:20.317Z",
+        "picture": "images/avatar_2x.png",
+        "birthday": null,
+        "sex": "Unknown",
+        "info": null,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "quiz.test",
+    "pk": 1,
+    "fields": {
+        "name": "Sample Test 1",
+        "description": "Text which was added via fixtures #1",
+        "owner": 1,
+        "created_on": "2020-03-17T09:01:11.719Z",
+        "modified_on": "2020-03-17T09:02:12.121Z",
+        "is_active": false
+    }
+},
+{
+    "model": "quiz.test",
+    "pk": 2,
+    "fields": {
+        "name": "Sample Test 2",
+        "description": "Text which was added via fixtures #2",
+        "owner": 1,
+        "created_on": "2020-03-17T14:26:46.629Z",
+        "modified_on": "2020-03-17T14:38:24.170Z",
+        "is_active": false
+    }
+},
+{
+    "model": "quiz.question",
+    "pk": 1,
+    "fields": {
+        "test": 1,
+        "question": "<p>How many constructor can a class have in Python?</p>",
+        "wrong_answer_1": "0",
+        "wrong_answer_2": "There is no limit",
+        "wrong_answer_3": "2",
+        "correct_answer": "1",
+        "created_on": "2020-03-17T09:01:27.176Z",
+        "is_active": true
+    }
+},
+{
+    "model": "quiz.question",
+    "pk": 2,
+    "fields": {
+        "test": 1,
+        "question": "<p>Which of the following data types is not supported in python ?</p>",
+        "wrong_answer_1": "List",
+        "wrong_answer_2": "Dictionary",
+        "wrong_answer_3": "Tuple",
+        "correct_answer": "Generics",
+        "created_on": "2020-03-17T09:01:37.252Z",
+        "is_active": true
+    }
+},
+{
+    "model": "quiz.question",
+    "pk": 3,
+    "fields": {
+        "test": 2,
+        "question": "<p>Which of the following function convert a String to a list in python ?</p>",
+        "wrong_answer_1": "tuple(s)",
+        "wrong_answer_2": "eval(str)",
+        "wrong_answer_3": "repr(x)",
+        "correct_answer": "list(s)",
+        "created_on": "2020-03-17T09:01:46.164Z",
+        "is_active": true
+    }
+}
+]

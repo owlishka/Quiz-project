@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% load humanize %}
+{% block title%}<title>Test detail</title>{% endblock %}
+
+{% block content %}
+<div style="margin: 2rem">
+    <div class="row">
+        <div class="card col s12 l12">
+            <div class="card-content">
+                <div class="row">
+                    <div class="col s8 l4 offset-s2">
+                        <h3 class="card-title grey-text text-darken-4" style="font-size:2.2rem">{{ test.name }}</h3>
+                        <h6 class="card-title grey-text text-darken-4" style="font-size:2.2rem">by {{ test.owner.username }}</h6>
+                        <span class=" grey-text text-darken-2">{{ test.description}}</span>
+                    </div>
+                    <div class="col s6 l2 center-align">
+                        <h4 class="card-title grey-text text-darken-4">{{ test.get_attempts }}</h4>
+                        <span class=" grey-text text-darken-2">Total Submissions</span>
+                    </div>
+                    <div class="col s6 l2 center-align">
+                        <h4 class="card-title grey-text text-darken-4">{{ test.get_question_count }}</h4>
+                        <span class=" grey-text text-darken-2">Number of Questions</span>
+                    </div>
+                    <div class="col s6 l2 center-align">
+                        <h4 class="card-title grey-text text-darken-4">{{ test.created_on|date }}</h4>
+                        <span class=" grey-text text-darken-2">Published Date</span>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <div class="row">
+                    <div class="col s12 l6 right">
+                        <a href="{% url 'quiz:take_quiz' pk=test.pk %}" class="btn blue right"{% if not request.user.is_authenticated %}disabled{% endif %}>
+                        {% if user_teststat %}
+                        {% if user_teststat.has_completed %}
+                            Result
+                        {% else %}
+                            Continue
+                        {% endif %}
+                        {% else %}
+                            Take Quiz
+                        {% endif %}
+                        </a>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="comments">
+        <h3 class="title-question">Comments | ({{ comments.count }})</h3>
+    </div>
+<div class="row">
+        <div class="col s12">
+             <ul class="collection" id="comment_section">
+                {% for comment in comments %}
+                <li class="collection-item">
+                    <span class="title">{{ comment.candidate.username }}</span><br>
+                    {{ comment.created_on|naturaltime }}<br>
+                    {{ comment.message }}
+                    {% if comment.candidate == request.user %}
+                        <form class="secondary-content" method="post" action="{% url 'quiz:delete_comment' pk=comment.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" style="position: absolute; right: 0"><i class="material-icons red-text">delete</i></button>
+                         </form>
+                    {% endif %}
+                </li>
+                {% endfor %}
+                {% if request.user.is_authenticated %}
+                <li class="valign-wrapper row" style="margin: 1rem">
+                    <div class="input-field col s11">
+                        <form action="{% url 'quiz:create_comment' test.pk %}" method="post">
+                            {% csrf_token %}
+                            <p><label for="id_response">Add your comment</label></p>
+                            {% render_field comment_form.message class="input-lg form-control" %}
+                            <button class="waves-effect waves-light btn col s1" type="submit">Comment</button>
+                        </form>
+                    </div>
+                </li>
+                {% endif %}
+              </ul>
+        </div>
+    </div>
+</div>
+{% endblock content %}
